@@ -1,64 +1,45 @@
-// routes/homeworkRoutes.js
-
 const express = require('express');
 const router = express.Router();
 const Homework = require('../models/Homework');
+const authMiddleware = require('../middleware/authMiddleware');
 
-// Route: POST /api/homework
-// Description: Create a new homework assignment
-router.post('/', async (req, res) => {
-  try {
-    const { title, description, dueDate, class: className } = req.body;
+// Create a homework assignment
+router.post('/', authMiddleware, async (req, res) => {
+    try {
+        const { classValue, section, subject, title, description, dueDate } = req.body;
+        const createdBy = req.user._id;
 
-    // Create a new homework assignment
-    const newHomework = new Homework({
-      title,
-      description,
-      dueDate,
-      class: className,
-      selection,
-    });
+        const newHomework = new Homework({
+            classValue,
+            section,
+            subject,
+            title,
+            description,
+            dueDate,
+            createdBy,
+        });
 
-    // Save the homework assignment to the database
-    await newHomework.save();
+        await newHomework.save();
 
-    res.status(201).json({ message: 'Homework assignment created successfully', homework: newHomework });
-  } catch (error) {
-    console.error('Error creating homework assignment:', error.message);
-    res.status(500).json({ message: 'Internal server error' });
-  }
-});
-
-router.get('/', async (req, res) => {
-  try {
-    // Retrieve all homework assignments from the database
-    const homeworkAssignments = await Homework.find();
-
-    res.status(200).json(homeworkAssignments);
-  } catch (error) {
-    console.error('Error retrieving homework assignments:', error.message);
-    res.status(500).json({ message: 'Internal server error' });
-  }
-});
-
-router.put('/:id', async (req, res) => {
-  try {
-    const { id } = req.params;
-    const { title, description, dueDate, class: className, section } = req.body;
-
-    // Find the homework assignment by ID and update its details
-    const updatedHomework = await Homework.findByIdAndUpdate(id, { title, description, dueDate, class: className }, { new: true });
-    if (!updatedHomework) {
-      return res.status(404).json({ message: 'Homework assignment not found' });
+        res.status(201).json({ message: 'Homework assignment created successfully' });
+    } catch (error) {
+        console.error('Error creating homework assignment:', error.message);
+        res.status(500).json({ message: 'Internal server error' });
     }
-
-    res.status(200).json({ message: 'Homework assignment updated successfully', homework: updatedHomework });
-  } catch (error) {
-    console.error('Error updating homework assignment:', error.message);
-    res.status(500).json({ message: 'Internal server error' });
-  }
 });
 
-
+// Get homework assignments by class, section, and subject
+//router.get('/:class/:section/:subject/:title/:description', async (req, res) => {
+router.get('/', async (req, res) => {
+    try {
+        //const { classValue, section, subject, title, description } = req.params;
+        //const homeworkAssignments = await Homework.find({ classValue, section, subject, title, description  }).sort({ createdAt: -1 });
+        const homeworkAssignments = await Homework.find().sort({ createdAt: -1 });
+        res.status(200).json(homeworkAssignments);
+    } catch (error) {
+        console.error('Error retrieving homework assignments:', error.message);
+        res.status(500).json({ message: 'Internal server error' });
+    }
+});
 
 module.exports = router;

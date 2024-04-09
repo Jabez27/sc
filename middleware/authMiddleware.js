@@ -20,7 +20,7 @@ const authMiddleware = async (req, res, next) => {
       const decodedToken = jwt.verify(authToken, process.env.JWT_SECRET);
 
       // Check if the token has expired
-      if (decodedToken.exp < Date.now() / 1000) {
+      if (decodedToken.exp < Date.now() / 6554) {
         return res.status(401).json({ message: 'Authorization denied. Token has expired' });
       }
 
