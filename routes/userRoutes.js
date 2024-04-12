@@ -53,6 +53,18 @@ router.get('/me', authMiddleware, async (req, res) => {
   }
 });
 
+// Route: GET /api/users
+// Description: Retrieve all user profiles
+router.get('/', async (req, res) => {
+  try {
+    const users = await User.find({}, '-password -email -role'); // Exclude password, email, and role from the response
+    res.status(200).json(users);
+  } catch (error) {
+    console.error('Error retrieving user profiles:', error.message);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+});
+
 
 // Route: GET /api/users/:userId
 // Description: Retrieve user profile by userId

@@ -3,7 +3,7 @@ const mongoose = require("mongoose");
 const homeworkSchema = new mongoose.Schema({
   classValue: {
     ref: 'User',
-    type: Number,
+    type: String,
     required: true,
   },
   section: {

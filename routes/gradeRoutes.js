@@ -3,64 +3,84 @@
 const express = require('express');
 const router = express.Router();
 const Grade = require('../models/Grade');
+const User = require('../models/User');
+const authMiddleware = require('../middleware/authMiddleware');
+
+
 
 // Route: POST /api/grades
-// Description: Add exam marks for a student
+// Description: Upload marks for students
 router.post('/', async (req, res) => {
   try {
-    const { student, exam, subject, marks } = req.body;
+    const { grades } = req.body;
 
-    // Create a new grade record
-    const newGrade = new Grade({
-      student,
-      exam,
-      subject,
-      marks
-    });
+    for (const grade of grades) {
+      const { rollNumber, username, classValue, section, subject, exam, marks } = grade;
 
-    // Save the grade to the database
-    await newGrade.save();
+      const existingGrade = await Grade.findOne({ rollNumber, username, classValue, section, subject, exam });
+      if (existingGrade) {
+        return res.status(400).json({ message: 'Marks already uploaded for this student, exam, and subject' });
+      }
 
-    res.status(201).json({ message: 'Exam marks added successfully', grade: newGrade });
+      const newGrade = new Grade({ rollNumber, username, classValue, section, subject, exam, marks });
+
+      await newGrade.save();
+    }
+
+    res.status(201).json({ message: 'Marks uploaded successfully' });
   } catch (error) {
-    console.error('Error adding exam marks:', error.message);
+    console.error('Error uploading marks:', error.message);
     res.status(500).json({ message: 'Internal server error' });
   }
 });
 
-router.put('/:gradeId', async (req, res) => {
-    try {
-      const { gradeId } = req.params;
-      const { marks } = req.body;
-  
-      // Find grade by gradeId and update marks
-      const updatedGrade = await Grade.findByIdAndUpdate(gradeId, { marks }, { new: true });
-      if (!updatedGrade) {
-        return res.status(404).json({ message: 'Grade not found' });
-      }
-  
-      res.status(200).json({ message: 'Exam marks updated successfully', grade: updatedGrade });
-    } catch (error) {
-      console.error('Error updating exam marks:', error.message);
-      res.status(500).json({ message: 'Internal server error' });
+
+router.get('/me', authMiddleware, async (req, res) => {
+  try {
+    const { authToken } = req.headers; 
+    const grades = await Grade.find({ authToken });
+
+    if (grades.length === 0) {
+      return res.status(404).json({ message: 'No grades found for this user' });
     }
-  });
-  
-router.get('/student/:studentId', async (req, res) => {
-    try {
-      const { studentId } = req.params;
-  
-      const grades = await Grade.find({ student: studentId });
-      if (grades.length === 0) {
-        return res.status(404).json({ message: 'No exam marks found for the student' });
-      }
-  
-      res.status(200).json(grades);
-    } catch (error) {
-      console.error('Error retrieving exam marks:', error.message);
-      res.status(500).json({ message: 'Internal server error' });
+
+    res.status(200).json(grades);
+  } catch (error) {
+    console.error('Error fetching grades:', error.message);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+});
+
+module.exports = router;
+
+
+router.get('/', async (req, res) => {
+  try {
+    const grades = await Grade.find();
+    res.status(200).json(grades);
+  } catch (error) {
+    console.error('Error fetching grades:', error.message);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+});
+
+
+router.get('/:rollNumber', async (req, res) => {
+  try {
+    const { rollNumber } = req.params;
+    const grades = await Grade.find({ rollNumber });
+    if (grades.length === 0) {
+      return res.status(404).json({ message: 'No grades found for this student' });
     }
-  });
+    res.status(200).json(grades);
+  } catch (error) {
+    console.error('Error fetching grades:', error.message);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+});
+
+module.exports = router;
+
 
 
 module.exports = router;

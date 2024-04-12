@@ -1,3 +1,4 @@
+//models/User.js
 const mongoose = require('mongoose');
 const userSchema = new mongoose.Schema({
   username: {
@@ -19,7 +20,7 @@ const userSchema = new mongoose.Schema({
     default: 'student',
   },
   classValue: {
-    type: Number,
+    type: String,
     required: true,
   },
   section: {

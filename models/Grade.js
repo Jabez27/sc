@@ -3,22 +3,38 @@
 const mongoose = require('mongoose');
 
 const gradeSchema = new mongoose.Schema({
-  student: {
-    type: mongoose.Schema.Types.ObjectId,
+
+  username: {
+    type: String,
     ref: 'User',
     required: true
   },
-  exam: {
+  classValue: {
+    ref: 'User',
     type: String,
-    required: true
+    required: true,
+  },
+  section: {
+    ref: 'User',
+    type: String,
+    required: true,
+  },
+  rollNumber: {
+    ref: 'User',
+    type: Number,
+    required: true,
   },
   subject: {
     type: String,
-    required: true
+    required: true,
+  },
+  exam: {
+    type: String,
+    required: true,
   },
   marks: {
     type: Number,
-    required: true
+    required: true,
   }
 });
 
