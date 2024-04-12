@@ -1,5 +1,3 @@
-// routes/userRoutes.js
-
 const express = require('express');
 const router = express.Router();
 const authMiddleware = require('../middleware/authMiddleware');
@@ -9,7 +7,7 @@ const User = require('../models/User');
 // Description: Create a new user profile
 router.post('/', async (req, res) => {
   try {
-    const { username, email, role } = req.body;
+    const { username, email, password, role, classValue, section, rollNumber } = req.body;
 
     // Check if user already exists
     const existingUser = await User.findOne({ email });
@@ -21,7 +19,11 @@ router.post('/', async (req, res) => {
     const newUser = new User({
       username,
       email,
-      role
+      password,
+      role,
+      classValue,
+      section,
+      rollNumber
     });
     // Save the user profile to the database
     await newUser.save();
@@ -32,6 +34,25 @@ router.post('/', async (req, res) => {
     res.status(500).json({ message: 'Internal server error' });
   }
 });
+
+router.get('/me', authMiddleware, async (req, res) => {
+  try {
+    // Retrieve user information from request object (attached by auth middleware)
+    const userId = req.user._id; // Use authenticated user's ID
+    const user = await User.findById(userId).select('-password'); // Exclude password from the response
+
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    // Return the user profile
+    res.status(200).json(user);
+  } catch (error) {
+    console.error('Error retrieving user profile:', error.message);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+});
+
 
 // Route: GET /api/users/:userId
 // Description: Retrieve user profile by userId
@@ -55,10 +76,10 @@ router.get('/:userId', async (req, res) => {
 router.put('/:userId', async (req, res) => {
   try {
     const { userId } = req.params;
-    const { username, email, role } = req.body;
+    const { username, email, password, role, classValue, section, rollNumber } = req.body;
 
     // Find user profile by userId and update
-    const updatedUser = await User.findByIdAndUpdate(userId, { username, email, role }, { new: true });
+    const updatedUser = await User.findByIdAndUpdate(userId, { username, email, password, role, classValue, section, rollNumber }, { new: true });
     if (!updatedUser) {
       return res.status(404).json({ message: 'User not found' });
     }
@@ -69,39 +90,6 @@ router.put('/:userId', async (req, res) => {
   }
 });
 
-router.get('/:userId/profile', authMiddleware, async (req, res) => {
-  try {
-    const { userId } = req.params;
-    const user = await User.findById(userId).select('-password'); // Exclude password from the response
-    if (!user) {
-      return res.status(404).json({ message: 'User not found' });
-    }
-    res.status(200).json(user);
-  } catch (error) {
-    console.error('Error retrieving user profile:', error.message);
-    res.status(500).json({ message: 'Internal server error' });
-  }
-});
 
-
-// Route: GET /api/users/me
-// Description: Retrieve profile of the authenticated user
-router.get('/me', authMiddleware, async (req, res) => {
-  try {
-    // Retrieve user information from request object (attached by auth middleware)
-    const userId = req.user._id; // Use authenticated user's ID
-    const user = await User.findById(userId).select('-password'); // Exclude password from the response
-
-    if (!user) {
-      return res.status(404).json({ message: 'User not found' });
-    }
-
-    // Return the user profile
-    res.status(200).json(user);
-  } catch (error) {
-    console.error('Error retrieving user profile:', error.message);
-    res.status(500).json({ message: 'Internal server error' });
-  }
-});
 
 module.exports = router;

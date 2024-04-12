@@ -28,12 +28,8 @@ router.post('/', authMiddleware, async (req, res) => {
     }
 });
 
-// Get homework assignments by class, section, and subject
-//router.get('/:class/:section/:subject/:title/:description', async (req, res) => {
 router.get('/', async (req, res) => {
-    try {
-        //const { classValue, section, subject, title, description } = req.params;
-        //const homeworkAssignments = await Homework.find({ classValue, section, subject, title, description  }).sort({ createdAt: -1 });
+    try {   
         const homeworkAssignments = await Homework.find().sort({ createdAt: -1 });
         res.status(200).json(homeworkAssignments);
     } catch (error) {
@@ -41,5 +37,5 @@ router.get('/', async (req, res) => {
         res.status(500).json({ message: 'Internal server error' });
     }
 });
-
 module.exports = router;
+    
