@@ -30,8 +30,8 @@ router.post('/', authMiddleware, async (req, res) => {
 
 router.get('/', async (req, res) => {
     try {
-        const feedUpdates = await Feed.find().sort({ createdAt: -1 });
-        res.status(200).json(feedUpdates);
+        const Chatrooms = await Feed.find().sort({ createdAt: -1 });
+        res.status(200).json(Chatrooms);
     } catch (error) {
         console.error('Error retrieving feed updates:', error.message);
         res.status(500).json({ message: 'Internal server error' });

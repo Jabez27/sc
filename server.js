@@ -36,8 +36,9 @@ const homeworkRoutes = require('./routes/homeworkRoutes');
 const feedRoutes = require('./routes/feedRoutes');
 const gradeRoutes = require('./routes/gradeRoutes');
 const chatroomRoutes = require('./routes/chatroomRoutes'); 
+const messageRoutes = require('./routes/messageRoutes');
 
-
+app.use('/api/message', messageRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/homework', homeworkRoutes);
